@@ -5,6 +5,7 @@
 import socket
 import json
 import os
+import sys
 from conf import settings
 from lib import public
 
@@ -155,6 +156,7 @@ class MyClient:
             data = f.read(1024)
             self.sk.send(data)
             has_send += len(data)
+            self.show_process(has_send, file_size)
         f.close()
         # 全部上传完毕，校验文件的一致性
         md5_mm = public.get_all_file_md5(client_path)
@@ -216,6 +218,7 @@ class MyClient:
                 data = self.sk.recv(settings.BUFFER_SIZE)
                 f.write(data)
                 has_received += len(data)
+                self.show_process(has_received, file_size)
             f.close()
             # 全部下载完毕，校验文件的一致性
             md5_mm = public.get_all_file_md5(client_path)
@@ -225,6 +228,12 @@ class MyClient:
                 print('\033[1;34m下载成功!\033[0m')
             else:
                 print('\033[1;34m下载失败，请重试!\033[0m')
+
+    @staticmethod
+    def show_process(has, total):
+        rate = has / total
+        rate_num = int(rate * 100)
+        sys.stdout.write('\r%s%s%%' % ('*' * (rate_num + 1), rate_num))
 
     def dir(self, cmd_list):
         # dir
